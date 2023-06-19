@@ -97,13 +97,39 @@ cs('.pizzaInfo--size').forEach((size, sizeIndex)=>{
 c('.pizzaInfo--addButton').addEventListener('click', ()=>{
     let size = parseInt(c('.pizzaInfo--size.selected').getAttribute('data-key'));
 
-    //Adicionando itens ao array do carrinho
-    cart.push({
-        id:pizzaJson[modalKey].id,
-        size,
-        qt:modalQt
-    });
+    //Identificador
+    let identifier = pizzaJson[modalKey].id+'@'+size;
 
+    let key = cart.findIndex((item)=>item.identifier == identifier);
+
+    if (key > -1) {
+        cart[key].qt += modalQt;
+    } else {
+        //Adicionando itens ao array do carrinho
+        cart.push({
+            id:pizzaJson[modalKey].id,
+            size,
+            qt:modalQt
+        });
+    }
+
+    //Atualizando o carrinho
+    updateCart();
     //fechando modal após clilcar em "adicionar ao carrinho"
     closeModal();
 });
+
+//Função para atualizar o carrinho
+function updateCart() {
+    if(cart.length > 0) {
+        c('aside').classList.add('show');
+        //Loop que percorre cada item do array 'cart'
+        for(let i in cart) {
+            let pizzaItem = pizzaJson.find((item)=>item.id == cart[i].id);
+
+            console.log(pizzaItem);
+        }
+    } else {
+        c('aside').classList.remove('show');
+    }
+}
