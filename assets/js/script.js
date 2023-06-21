@@ -107,6 +107,7 @@ c('.pizzaInfo--addButton').addEventListener('click', ()=>{
     } else {
         //Adicionando itens ao array do carrinho
         cart.push({
+            identifier,
             id:pizzaJson[modalKey].id,
             size,
             qt:modalQt
@@ -124,11 +125,66 @@ function updateCart() {
     if(cart.length > 0) {
         c('aside').classList.add('show');
         //Loop que percorre cada item do array 'cart'
+        c('.cart').innerHTML = '';
+
+        //Variáveis para carcular os valores
+        let subtotal = 0;
+        let desconto = 0;
+        let total = 0;
+
         for(let i in cart) {
             let pizzaItem = pizzaJson.find((item)=>item.id == cart[i].id);
+            //Calculo de subtotal
+            subtotal += pizzaItem.price * cart [i].qt;
 
-            console.log(pizzaItem);
+
+            //Clonando cart--item
+            let cartItem = c('.models .cart--item').cloneNode(true);
+
+            //Variável declarada para exibição do tamanho da pizza
+            let pizzaSizeName;
+            switch(cart[i].size) {
+                case 0:
+                    pizzaSizeName = 'P';
+                    break;
+                case 1:
+                    pizzaSizeName = 'M';
+                    break;
+                case 2:
+                    pizzaSizeName = 'G';
+                    break;
+            }
+            //Variável para associar o nome da pizza com seu devido tamanho
+            let pizzaName = `${pizzaItem.name} (${pizzaSizeName})`;
+            
+            cartItem.querySelector('img').src = pizzaItem.img;
+            cartItem.querySelector('.cart--item-nome').innerHTML = pizzaName;
+            cartItem.querySelector('.cart--item--qt').innerHTML = cart[i].qt;
+            cartItem.querySelector('.cart--item-qtmenos').addEventListener('click', ()=>{
+                if(cart[i].qt > 1) {
+                    cart[i].qt--;
+                } else {
+                    //Caso tenha apenas uma unidade do item, o mesmo será removido do carrinho
+                    cart.splice(i, 1);
+                }
+                updateCart();
+            });
+            cartItem.querySelector('.cart--item-qtmais').addEventListener('click', ()=>{
+                cart[i].qt++;
+                updateCart();
+            });
+
+            c('.cart').append(cartItem)
         }
+
+        //Desconto de 10%
+        desconto = subtotal * 0.1;
+        total = subtotal - desconto;
+
+        c('.subtotal span:last-child').innerHTML = `R$ ${subtotal.toFixed(2)}`;
+        c('.desconto span:last-child').innerHTML = `R$ ${desconto.toFixed(2)}`;
+        c('.total span:last-child').innerHTML = `R$ ${total.toFixed(2)}`;
+
     } else {
         c('aside').classList.remove('show');
     }
