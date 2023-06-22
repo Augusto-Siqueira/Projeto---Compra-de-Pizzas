@@ -15,7 +15,7 @@ pizzaJson.map((item, index) =>{
     
     pizzaItem.setAttribute('data-key', index);
     pizzaItem.querySelector('.pizza-item--img img').src = item.img;
-    pizzaItem.querySelector('.pizza-item--price').innerHTML = `R$ ${item.price.toFixed(2)}`;
+    pizzaItem.querySelector('.pizza-item--price').innerHTML = `R$ ${item.prices[0].toFixed(2)}`;
     pizzaItem.querySelector('.pizza-item--name').innerHTML = item.name;
     pizzaItem.querySelector('.pizza-item--desc').innerHTML = item.description;
 
@@ -23,7 +23,8 @@ pizzaJson.map((item, index) =>{
     pizzaItem.querySelector('a').addEventListener('click', (e)=>{
         e.preventDefault();
         //Variável para exibir as informações da pizza clicada
-        let key = e.target.closest('.pizza-item').getAttribute('data-key');
+        let key = e.currentTarget.closest('.pizza-item').getAttribute('data-key');
+
         //Variável para fixar a quantidade inicial de pizzas
         modalQt = 1;
         //Puxando a variável modalKey que irá memorizar qual key foi selecionado, para posteriormente utilizar esta memória para o carrinho 
@@ -33,8 +34,27 @@ pizzaJson.map((item, index) =>{
         c('.pizzaBig img').src = pizzaJson[key].img;
         c('.pizzaInfo h1').innerHTML = pizzaJson[key].name;
         c('.pizzaInfo--desc').innerHTML = pizzaJson[key].description;
-        c('.pizzaInfo--actualPrice').innerHTML = `R$ ${pizzaJson[key].price.toFixed(2)}`;
+        c('.pizzaInfo--actualPrice').innerHTML = `R$ ${pizzaJson[key].prices[0].toFixed(2)}`;
+        c('.pizzaInfo--actualPrice').innerHTML = `R$ ${pizzaJson[key].prices[1].toFixed(2)}`;
+        c('.pizzaInfo--actualPrice').innerHTML = `R$ ${pizzaJson[key].prices[2].toFixed(2)}`;
         c('.pizzaInfo--size.selected').classList.remove('selected');
+
+        // Função para atualizar o preço no modal
+        function updatePrice(sizeIndex) {
+            const price = pizzaJson[modalKey].prices[sizeIndex];
+            const priceElement = c('.pizzaInfo--actualPrice');
+            priceElement.innerHTML = `R$ ${price.toFixed(2)}`;
+        }
+        
+        // Adiciona evento de clique aos tamanhos de pizza
+        cs('.pizzaInfo--size').forEach((size, sizeIndex) => {
+            size.addEventListener('click', (e) => {
+            c('.pizzaInfo--size.selected').classList.remove('selected');
+            size.classList.add('selected');
+            updatePrice(sizeIndex);
+            });
+        });
+
         //.forEach = Para cada um dos itens
         cs('.pizzaInfo--size').forEach((size, sizeIndex)=>{
             if(sizeIndex == 2) {
@@ -58,7 +78,7 @@ pizzaJson.map((item, index) =>{
 });
 
 //Eventos do modal
-//função para eexecutar os botões que fecham o modal
+//função para executar os botões que fecham o modal
 function closeModal () {
     c('.pizzaWindowArea').style.opacity = 0;
     setTimeout(()=>{
@@ -120,8 +140,23 @@ c('.pizzaInfo--addButton').addEventListener('click', ()=>{
     closeModal();
 });
 
+//Ação para abrir o carrinho no mobile
+c('.menu-openner').addEventListener('click', ()=> {
+    if (cart.length > 0) {
+        c('aside').style.left = '0';
+    }
+});
+
+//Ação para fechar o carrinho no mobile
+c('.menu-closer').addEventListener('click', ()=>{
+    c('aside').style.left = '100vw';
+});
+
 //Função para atualizar o carrinho
 function updateCart() {
+    //atualizando o valor do span no carrinho mobile
+    c('.menu-openner span').innerHTML = cart.length;
+
     if(cart.length > 0) {
         c('aside').classList.add('show');
         //Loop que percorre cada item do array 'cart'
@@ -135,7 +170,7 @@ function updateCart() {
         for(let i in cart) {
             let pizzaItem = pizzaJson.find((item)=>item.id == cart[i].id);
             //Calculo de subtotal
-            subtotal += pizzaItem.price * cart [i].qt;
+            subtotal += pizzaItem.prices[cart[i].size] * cart [i].qt;
 
 
             //Clonando cart--item
@@ -187,5 +222,6 @@ function updateCart() {
 
     } else {
         c('aside').classList.remove('show');
+        c('aside').style.left = '100vw';
     }
 }
